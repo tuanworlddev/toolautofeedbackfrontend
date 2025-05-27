@@ -4,7 +4,7 @@ const feedbackService = {
 
     async getCountUnanswered(apiKey: string) {
         try {
-            const response = await axiosClient.get(`/feedbacks/count-unanswered?apikey=${apiKey}`);
+            const response = await axiosClient.get(`/feedbacks/count-unanswered?apiKey=${apiKey}`);
             return response.data;
         } catch (error) {
             console.error(`Error get count unanswered ${error}`);
@@ -35,8 +35,8 @@ const feedbackService = {
             });
             return response.data.feedbacks;
         } catch (error) {
-            console.error(`Error process ${error}`);
-            throw new Error(`Error process ${error}`);
+            console.error(`Error get feedbacks ${error}`);
+            throw new Error(`Error get feedbacks ${error}`);
         }
     }
 

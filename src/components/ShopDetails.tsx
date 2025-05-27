@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Shop } from "../models/shop";
 import feedbackService from "../services/feedbackService";
 import questionService from "../services/questionService";
+import ReplyItem from "./ReplyItem";
 
 type ShopDetailsProps = {
     shop: Shop;
@@ -16,14 +17,13 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
     const [countUnansweredToday, setCountUnansweredToday] = useState(0);
     const [countQuestionUnanswered, setCountQuestionUnanswered] = useState(0);
     const [countQuestionUnansweredToday, setCountQuestionUnansweredToday] = useState(0);
-    const [feedbacks, setFeedbacks] = useState<any>([]);
+    const [questions, setquestions] = useState<any>([]);
     const [loading, setLoading] = useState(false);
     const [processQuestionLoading, setProcessQuestionLoading] = useState(false);
 
     useEffect(() => {
         fetchCountUnanswered();
         fetchCountQuestionUnanswered();
-        fetchFeedbacks();
     }, [shop.id]);
 
     const fetchCountUnanswered = async () => {
@@ -32,9 +32,21 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
         setCountUnansweredToday(response.countUnansweredToday);
     }
 
-    const fetchFeedbacks = async () => {
-        const response = await feedbackService.getFeedbacks(shop.apiKey, true, 20, 0, "dateDesc");
-        setFeedbacks(response);
+    const fetchCountQuestionUnanswered = async () => {
+        const response = await questionService.getCountUnanswered(shop.apiKey);
+        setCountQuestionUnanswered(response.countUnanswered);
+        setCountQuestionUnansweredToday(response.countUnansweredToday);
+        const take = response.countUnanswered;
+        if (take > 0) {
+            await fetchQuestions(take);
+        } else {
+            setquestions([]);
+        }
+    }
+
+    const fetchQuestions = async (take: number) => {
+        const response = await questionService.getQuestions(shop.apiKey, false, take, 0, "dateDesc");
+        setquestions(response);
     }
 
     const process = async () => {
@@ -46,12 +58,6 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
         setLoading(false);
     }
 
-    const fetchCountQuestionUnanswered = async () => {
-        const response = await questionService.getCountUnanswered(shop.apiKey);
-        setCountQuestionUnanswered(response.countUnanswered);
-        setCountQuestionUnansweredToday(response.countUnansweredToday);
-    }
-
     const processQuestion = async () => {
         setProcessQuestionLoading(true);
         const response = await questionService.process(shop.id);
@@ -61,9 +67,14 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
         setProcessQuestionLoading(false);
     }
 
-    const seeMoreFeedbacks = async () => {
-        const response = await feedbackService.getFeedbacks(shop.apiKey, true, 20, feedbacks.length, "dateDesc");
-        setFeedbacks((prev: any) => [...prev, ...response]);
+    const reply = async (id: string, answer: string) => {
+        const response = await questionService.reply(shop.apiKey, id, answer);
+        if (response.status === 200) {
+            setquestions((prev: any) => prev.filter((q: any) => q.id != id));
+            const responseCount = await questionService.getCountUnanswered(shop.apiKey);
+            setCountQuestionUnanswered(responseCount.countUnanswered);
+            setCountQuestionUnansweredToday(responseCount.countUnansweredToday);
+        }
     }
 
     return (
@@ -106,7 +117,7 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                                 Count Unanswered today: {countUnansweredToday}
                             </div>
                             {countUnanswered > 0 ? (
-                                <button onClick={process} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={loading ? true : false}>{loading ? 'Processing...' : 'Process'}</button>
+                                <button onClick={process} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={loading ? true : false}>{loading ? 'Processing...' : 'Process All'}</button>
                             ) : (
                                 <div></div>
                             )}
@@ -122,53 +133,28 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                                 Count Unanswered today: {countQuestionUnansweredToday}
                             </div>
                             {countQuestionUnanswered > 0 ? (
-                                <button onClick={processQuestion} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={processQuestionLoading ? true : false}>{processQuestionLoading ? 'Processing...' : 'Process'}</button>
+                                <button onClick={processQuestion} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={processQuestionLoading ? true : false}>{processQuestionLoading ? 'Processing...' : 'Process All'}</button>
                             ) : (
                                 <div></div>
                             )}
                         </div>
                     </div>
                     <div className="w-full md:w-1/2 bg-white rounded-md p-3">
-                        <div className="md:text-xl font-bold text-blue-800 mb-2">Feedbacks ({feedbacks.length})</div>
+                        <div className="md:text-xl font-bold text-blue-800 mb-2">Recommend reply Question ({questions.length})</div>
                         <div className="overflow-y-auto" style={{ maxHeight: "500px" }}>
-                            {feedbacks.length > 0 ? (
+                            {questions.length > 0 ? (
                                 <div>
-                                    {feedbacks.map((feedback: any) => (
-                                        <div
-                                            key={feedback.id}
-                                            className="border border-gray-300 shadow-md rounded-xl p-4 mb-4 bg-white"
-                                        >
-                                            <div className="text-base font-semibold text-blue-800 mb-2">
-                                                Customer: <span className="font-normal text-gray-800">{feedback.userName}</span>
-                                            </div>
-                                            <div className="mb-1">
-                                                <span className="font-medium text-gray-700">Product:</span>{' '}
-                                                <span className="text-gray-900">{feedback.productDetails.productName}</span>
-                                            </div>
-                                            <div className="mb-1">
-                                                <span className="font-medium text-gray-700">Supplier art:</span>{' '}
-                                                <span className="text-gray-900">{feedback.productDetails.supplierArticle}</span>
-                                            </div>
-                                            <div className="mb-1">
-                                                <span className="font-medium text-gray-700">Valuation:</span>{' '}
-                                                <span className="text-yellow-500 font-semibold">{feedback.productValuation} ★</span>
-                                            </div>
-                                            <div className="mb-1">
-                                                <span className="font-medium text-gray-700">Question:</span>{' '}
-                                                <span className="text-gray-900">{feedback.text || 'No question yet'}</span>
-                                            </div>
-                                            <div>
-                                                <span className="font-medium text-gray-700">Answer:</span>{' '}
-                                                <span className="text-gray-900">{feedback.answer?.text || 'No answer yet'}</span>
-                                            </div>
-                                        </div>
+                                    {questions.map((question: any) => (
+                                        <ReplyItem
+                                            key={question.id}
+                                            apiKey={shop.apiKey}
+                                            question={question}
+                                            onReply={reply}
+                                        />
                                     ))}
-                                    <div className="text-center">
-                                        <button onClick={seeMoreFeedbacks} className="text-blue-500 hover:text-blue-600 active:text-blue-700 font-bold transition-colors cursor-pointer">Seed more</button>
-                                    </div>
                                 </div>
                             ) : (
-                                <div>Feedbacks is empty</div>
+                                <div>Qurstions is empty</div>
                             )}
                         </div>
                     </div>
