@@ -18,14 +18,14 @@ function HomePage() {
     }, []);
 
     return (
-        <div className="flex">
+        <div className="flex flex-col md:flex-row">
             <Sidebar
                 shops={shops}
                 selectedShop={selectedShop}
                 onCreateClick={() => setShowCreateShopModal(true)}
                 onSelectShop={(shop: Shop) => changeSelectedShop(shop)}
             />
-            <div className="flex-1 bg-blue-50 p-6">
+            <div className="flex-1 bg-blue-50">
                 {selectedShop ? (
                     <ShopDetails
                         shop={selectedShop}

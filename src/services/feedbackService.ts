@@ -20,6 +20,24 @@ const feedbackService = {
             console.error(`Error process ${error}`);
             throw new Error(`Error process ${error}`);
         }
+    },
+
+    async getFeedbacks(apiKey: string, isAnswered: boolean = true, take: number = 20, skip: number = 0, order: string = "dateDesc") {
+        try {
+            const response = await axiosClient.get(`/feedbacks`, {
+                params: {
+                    apiKey: apiKey,
+                    isAnswered: isAnswered,
+                    take: take,
+                    skip: skip,
+                    order: order
+                },
+            });
+            return response.data.feedbacks;
+        } catch (error) {
+            console.error(`Error process ${error}`);
+            throw new Error(`Error process ${error}`);
+        }
     }
 
 }
