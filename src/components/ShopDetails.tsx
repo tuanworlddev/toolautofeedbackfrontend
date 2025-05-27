@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Shop } from "../models/shop";
 import feedbackService from "../services/feedbackService";
+import questionService from "../services/questionService";
 
 type ShopDetailsProps = {
     shop: Shop;
@@ -13,11 +14,15 @@ type ShopDetailsProps = {
 function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, onDeleteClick }: ShopDetailsProps) {
     const [countUnanswered, setCountUnanswered] = useState(0);
     const [countUnansweredToday, setCountUnansweredToday] = useState(0);
+    const [countQuestionUnanswered, setCountQuestionUnanswered] = useState(0);
+    const [countQuestionUnansweredToday, setCountQuestionUnansweredToday] = useState(0);
     const [feedbacks, setFeedbacks] = useState<any>([]);
     const [loading, setLoading] = useState(false);
+    const [processQuestionLoading, setProcessQuestionLoading] = useState(false);
 
     useEffect(() => {
         fetchCountUnanswered();
+        fetchCountQuestionUnanswered();
         fetchFeedbacks();
     }, [shop.id]);
 
@@ -32,11 +37,6 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
         setFeedbacks(response);
     }
 
-    const seeMoreFeedbacks = async () => {
-        const response = await feedbackService.getFeedbacks(shop.apiKey, true, 20, feedbacks.length, "dateDesc");
-        setFeedbacks((prev: any) => [...prev, ...response]);
-    }
-
     const process = async () => {
         setLoading(true);
         const response = await feedbackService.process(shop.id);
@@ -46,9 +46,29 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
         setLoading(false);
     }
 
+    const fetchCountQuestionUnanswered = async () => {
+        const response = await questionService.getCountUnanswered(shop.apiKey);
+        setCountQuestionUnanswered(response.countUnanswered);
+        setCountQuestionUnansweredToday(response.countUnansweredToday);
+    }
+
+    const processQuestion = async () => {
+        setProcessQuestionLoading(true);
+        const response = await questionService.process(shop.id);
+        if (response.status === 200) {
+            await fetchCountQuestionUnanswered();
+        }
+        setProcessQuestionLoading(false);
+    }
+
+    const seeMoreFeedbacks = async () => {
+        const response = await feedbackService.getFeedbacks(shop.apiKey, true, 20, feedbacks.length, "dateDesc");
+        setFeedbacks((prev: any) => [...prev, ...response]);
+    }
+
     return (
         <div className="p-3 md:p-6 min-h-screen">
-            <div className="flex w-full items-center justify-between bg-white rounded-md p-3 mb-3">
+            <div className="flex w-full items-center justify-between mb-3">
                 <div>
                     <div className="flex items-center justify-start gap-3">
                         <div className="text-blue-800 text-xl md:text-2xl font-bold">Shop: {shop.name} </div>
@@ -69,26 +89,44 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
             </div>
             {shop.activate ? (
                 <div className="flex flex-col md:flex-row items-start justify-between gap-3 mb-3">
-                    <div className="w-full md:w-1/2 bg-white rounded-md p-3">
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="md:text-xl font-bold text-blue-800">Info count unanswered</div>
-                            <label className="inline-flex items-center cursor-pointer">
-                                <span className="mr-1 text-sm font-medium text-blue-500">Auto reply feedback</span>
-                                <input type="checkbox" value="" className="sr-only peer" checked={shop.isAuto} onChange={() => onToggleIsAuto(shop.id)} />
-                                <div className="relative w-9 h-4 bg-blue-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
+                    <div className="w-full md:w-1/2 flex flex-col gap-3">
+                        <div className="bg-white rounded-md p-3">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="md:text-xl font-bold text-blue-800">Feedbacks count unanswered</div>
+                                <label className="inline-flex items-center cursor-pointer">
+                                    <span className="mr-1 text-sm font-medium text-blue-500">Auto reply feedback</span>
+                                    <input type="checkbox" value="" className="sr-only peer" checked={shop.isAuto} onChange={() => onToggleIsAuto(shop.id)} />
+                                    <div className="relative w-9 h-4 bg-blue-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            <div>
+                                Count Unanswered: {countUnanswered}
+                            </div>
+                            <div className="mb-2">
+                                Count Unanswered today: {countUnansweredToday}
+                            </div>
+                            {countUnanswered > 0 ? (
+                                <button onClick={process} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={loading ? true : false}>{loading ? 'Processing...' : 'Process'}</button>
+                            ) : (
+                                <div></div>
+                            )}
                         </div>
-                        <div>
-                            Count Unanswered: {countUnanswered}
+                        <div className="bg-white rounded-md p-3">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="md:text-xl font-bold text-blue-800">Questions count unanswered</div>
+                            </div>
+                            <div>
+                                Count Unanswered: {countQuestionUnanswered}
+                            </div>
+                            <div className="mb-2">
+                                Count Unanswered today: {countQuestionUnansweredToday}
+                            </div>
+                            {countQuestionUnanswered > 0 ? (
+                                <button onClick={processQuestion} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={processQuestionLoading ? true : false}>{processQuestionLoading ? 'Processing...' : 'Process'}</button>
+                            ) : (
+                                <div></div>
+                            )}
                         </div>
-                        <div className="mb-2">
-                            Count Unanswered today: {countUnansweredToday}
-                        </div>
-                        {countUnanswered > 0 ? (
-                            <button onClick={process} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={loading ? true : false}>{loading ? 'Processing...' : 'Process'}</button>
-                        ) : (
-                            <div></div>
-                        )}
                     </div>
                     <div className="w-full md:w-1/2 bg-white rounded-md p-3">
                         <div className="md:text-xl font-bold text-blue-800 mb-2">Feedbacks ({feedbacks.length})</div>

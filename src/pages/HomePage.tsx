@@ -25,7 +25,7 @@ function HomePage() {
                 onCreateClick={() => setShowCreateShopModal(true)}
                 onSelectShop={(shop: Shop) => changeSelectedShop(shop)}
             />
-            <div className="flex-1 bg-blue-50">
+            <div className="flex-1 bg-blue-50 min-h-screen">
                 {selectedShop ? (
                     <ShopDetails
                         shop={selectedShop}
@@ -35,7 +35,7 @@ function HomePage() {
                         onDeleteClick={() => setShowDeleteShopModal(true)}
                     />
                 ) : (
-                    <p className="text-gray-500">Select a store to see details.</p>
+                    <p className="text-gray-500 p-3">Select a store to see details.</p>
                 )}
             </div>
 
