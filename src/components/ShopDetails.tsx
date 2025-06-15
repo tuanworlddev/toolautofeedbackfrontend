@@ -3,6 +3,7 @@ import type { Shop } from "../models/shop";
 import feedbackService from "../services/feedbackService";
 import questionService from "../services/questionService";
 import ReplyItem from "./ReplyItem";
+import ReportComponent from "./ReportComponent";
 
 type ShopDetailsProps = {
     shop: Shop;
@@ -138,6 +139,7 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                                 <div></div>
                             )}
                         </div>
+                        <ReportComponent shop={shop} />
                     </div>
                     <div className="w-full md:w-1/2 bg-white rounded-md p-3">
                         <div className="md:text-xl font-bold text-blue-800 mb-2">Recommend reply Question ({questions.length})</div>
