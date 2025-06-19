@@ -1,6 +1,7 @@
 // src/services/reportService.ts
 import axios, { type AxiosRequestConfig } from 'axios';
 import { toast } from 'react-toastify';
+import type { Shop } from '../models/shop';
 
 /**
  * Tải file báo cáo (Excel) từ backend.
@@ -12,13 +13,13 @@ import { toast } from 'react-toastify';
  * @param discount  Chiết khấu (mặc định 3 %)
  */
 async function downloadReport(
-  apiKey: string,
+  shop: Shop,
   dateFrom: string,
   dateTo: string,
   tax = 0.06,
   discount = 3.5,
 ): Promise<void> {
-  const payload = { apiKey, dateFrom, dateTo, tax, discount };
+  const payload = { apiKey: shop.apiKey, dateFrom, dateTo, tax, discount };
 
   const config: AxiosRequestConfig = {
     headers: { 'Content-Type': 'application/json' },
@@ -37,9 +38,7 @@ async function downloadReport(
     });
     const url = URL.createObjectURL(blob);
 
-    const disposition = res.headers['content-disposition'];
-    const matched = disposition?.match(/filename="?([^"]+)"?/);
-    const filename = matched?.[1] ?? 'reports.zip';
+    const filename = `${shop.name}-reports-${new Date().toLocaleDateString()}.zip`;
 
     const link = document.createElement('a');
     link.href = url;

@@ -6,6 +6,7 @@ import CreateShopModal from "../components/CreateShopModal";
 import ShopDetails from "../components/ShopDetails";
 import UpdateShopModal from "../components/UpdateShopModal";
 import DeleteShopModal from "../components/DeleteShopModal";
+import Introduction from "../components/Introduction";
 
 function HomePage() {
     const { shops, fetchShop, createShop, updateShop, deleteShop, selectedShop, changeSelectedShop, toggleActivate, toggleIsAuto } = useShops();
@@ -35,7 +36,7 @@ function HomePage() {
                         onDeleteClick={() => setShowDeleteShopModal(true)}
                     />
                 ) : (
-                    <p className="text-gray-500 p-3">Select a store to see details.</p>
+                    <Introduction />
                 )}
             </div>
 

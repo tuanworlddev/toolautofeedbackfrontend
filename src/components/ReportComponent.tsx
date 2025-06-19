@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Shop } from "../models/shop";
 import reportService from "../services/reportService";
+import { toast } from "react-toastify";
 
 type Props = {
     shop: Shop;
@@ -13,9 +14,13 @@ function ReportComponent({ shop }: Props) {
     const [discount, setDiscount] = useState(3.5);
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        setLoading(false);
+    }, [shop.id])
+
     const handleDownload = async () => {
         if (!dateFrom || !dateTo) {
-            alert("Vui lòng chọn khoảng thời gian.");
+            toast.error("Vui lòng chọn khoảng thời gian.");
             return;
         }
 
@@ -23,9 +28,9 @@ function ReportComponent({ shop }: Props) {
         try {
             const fromISO = new Date(dateFrom).toISOString();
             const toISO = new Date(dateTo).toISOString();
-            await reportService.downloadReport(shop.apiKey, fromISO, toISO, tax, discount);
+            await reportService.downloadReport(shop, fromISO, toISO, tax, discount);
         } catch (error) {
-            alert("Lỗi khi tải báo cáo.");
+            toast.error("Lỗi tải báo cáo.");
         } finally {
             setLoading(false);
         }
@@ -89,8 +94,8 @@ function ReportComponent({ shop }: Props) {
                 onClick={handleDownload}
                 disabled={loading}
                 className={`px-4 py-2 rounded-md text-white transition-colors ${loading
-                        ? "bg-blue-300 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"
+                    ? "bg-blue-300 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"
                     }`}
             >
                 {loading ? "Đang tải..." : "Download Report"}
