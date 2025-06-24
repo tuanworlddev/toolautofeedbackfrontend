@@ -20,8 +20,6 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
     const [countQuestionUnanswered, setCountQuestionUnanswered] = useState(0);
     const [countQuestionUnansweredToday, setCountQuestionUnansweredToday] = useState(0);
     const [questions, setquestions] = useState<any>([]);
-    const [loading, setLoading] = useState(false);
-    const [processQuestionLoading, setProcessQuestionLoading] = useState(false);
 
     useEffect(() => {
         fetchCountUnanswered();
@@ -52,21 +50,17 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
     }
 
     const process = async () => {
-        setLoading(true);
         const response = await feedbackService.process(shop.id);
         if (response.status === 200) {
             await fetchCountUnanswered();
         }
-        setLoading(false);
     }
 
     const processQuestion = async () => {
-        setProcessQuestionLoading(true);
         const response = await questionService.process(shop.id);
         if (response.status === 200) {
             await fetchCountQuestionUnanswered();
         }
-        setProcessQuestionLoading(false);
     }
 
     const reply = async (id: string, answer: string) => {
