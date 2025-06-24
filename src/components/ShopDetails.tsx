@@ -4,6 +4,7 @@ import feedbackService from "../services/feedbackService";
 import questionService from "../services/questionService";
 import ReplyItem from "./ReplyItem";
 import ReportComponent from "./ReportComponent";
+import ButtonItem from "./ButtonItem";
 
 type ShopDetailsProps = {
     shop: Shop;
@@ -118,7 +119,7 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                                 Count Unanswered today: {countUnansweredToday}
                             </div>
                             {countUnanswered > 0 ? (
-                                <button onClick={process} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={loading ? true : false}>{loading ? 'Processing...' : 'Process All'}</button>
+                                <ButtonItem title="Reply All" onClick={process} />
                             ) : (
                                 <div></div>
                             )}
@@ -134,7 +135,7 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                                 Count Unanswered today: {countQuestionUnansweredToday}
                             </div>
                             {countQuestionUnanswered > 0 ? (
-                                <button onClick={processQuestion} className="px-4 py-2 bg-blue-500 disabled:bg-blue-300 text-white hover:bg-blue-600 active:bg-blue-700 transition-colors cursor-pointer rounded-md" disabled={processQuestionLoading ? true : false}>{processQuestionLoading ? 'Processing...' : 'Process All'}</button>
+                                <ButtonItem title="Reply All" onClick={processQuestion} />
                             ) : (
                                 <div></div>
                             )}

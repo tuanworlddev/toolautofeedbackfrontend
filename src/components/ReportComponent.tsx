@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Shop } from "../models/shop";
 import reportService from "../services/reportService";
 import { toast } from "react-toastify";
+import ButtonItem from "./ButtonItem";
 
 type Props = {
     shop: Shop;
@@ -12,10 +13,8 @@ function ReportComponent({ shop }: Props) {
     const [dateTo, setDateTo] = useState("");
     const [tax, setTax] = useState(0.06);
     const [discount, setDiscount] = useState(3.5);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        setLoading(false);
     }, [shop.id])
 
     const handleDownload = async () => {
@@ -23,21 +22,17 @@ function ReportComponent({ shop }: Props) {
             toast.error("Vui lòng chọn khoảng thời gian.");
             return;
         }
-
-        setLoading(true);
         try {
             const fromISO = new Date(dateFrom).toISOString();
             const toISO = new Date(dateTo).toISOString();
             await reportService.downloadReport(shop, fromISO, toISO, tax, discount);
         } catch (error) {
             toast.error("Lỗi tải báo cáo.");
-        } finally {
-            setLoading(false);
         }
     };
 
     return (
-        <div className="p-4 bg-white rounded-md shadow-md space-y-4">
+        <div className="p-4 bg-white rounded-md space-y-4">
             <h3 className="text-xl font-bold text-blue-800">Report</h3>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -90,7 +85,7 @@ function ReportComponent({ shop }: Props) {
                 </div>
             </div>
 
-            <button
+            {/* <button
                 onClick={handleDownload}
                 disabled={loading}
                 className={`px-4 py-2 rounded-md text-white transition-colors ${loading
@@ -99,7 +94,8 @@ function ReportComponent({ shop }: Props) {
                     }`}
             >
                 {loading ? "Đang tải..." : "Download Report"}
-            </button>
+            </button> */}
+            <ButtonItem title="Download Report" onClick={handleDownload} />
         </div>
     );
 }
