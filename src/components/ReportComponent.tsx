@@ -84,17 +84,6 @@ function ReportComponent({ shop }: Props) {
                     />
                 </div>
             </div>
-
-            {/* <button
-                onClick={handleDownload}
-                disabled={loading}
-                className={`px-4 py-2 rounded-md text-white transition-colors ${loading
-                    ? "bg-blue-300 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"
-                    }`}
-            >
-                {loading ? "Đang tải..." : "Download Report"}
-            </button> */}
             <ButtonItem title="Download Report" onClick={handleDownload} />
         </div>
     );

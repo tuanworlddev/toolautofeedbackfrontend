@@ -5,6 +5,7 @@ import questionService from "../services/questionService";
 import ReplyItem from "./ReplyItem";
 import ReportComponent from "./ReportComponent";
 import ButtonItem from "./ButtonItem";
+import Campaign from "./Campaign";
 
 type ShopDetailsProps = {
     shop: Shop;
@@ -136,25 +137,7 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                         </div>
                         <ReportComponent shop={shop} />
                     </div>
-                    <div className="w-full md:w-1/2 bg-white rounded-md p-3">
-                        <div className="md:text-xl font-bold text-blue-800 mb-2">Recommend reply Question ({questions.length})</div>
-                        <div className="overflow-y-auto" style={{ maxHeight: "500px" }}>
-                            {questions.length > 0 ? (
-                                <div>
-                                    {questions.map((question: any) => (
-                                        <ReplyItem
-                                            key={question.id}
-                                            apiKey={shop.apiKey}
-                                            question={question}
-                                            onReply={reply}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div>Qurstions is empty</div>
-                            )}
-                        </div>
-                    </div>
+                    <Campaign />
                 </div>
             ) : (
                 <div>
