@@ -23,9 +23,7 @@ function ReportComponent({ shop }: Props) {
             return;
         }
         try {
-            const fromISO = new Date(dateFrom).toISOString();
-            const toISO = new Date(dateTo).toISOString();
-            await reportService.downloadReport(shop, fromISO, toISO, tax, discount);
+            await reportService.downloadReport(shop, dateFrom, dateTo, tax, discount);
         } catch (error) {
             toast.error("Lỗi tải báo cáo.");
         }
