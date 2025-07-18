@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Shop } from "../models/shop";
 import feedbackService from "../services/feedbackService";
-import questionService from "../services/questionService";
-import ReplyItem from "./ReplyItem";
 import ReportComponent from "./ReportComponent";
 import ButtonItem from "./ButtonItem";
 import Campaign from "./Campaign";
@@ -18,13 +16,9 @@ type ShopDetailsProps = {
 function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, onDeleteClick }: ShopDetailsProps) {
     const [countUnanswered, setCountUnanswered] = useState(0);
     const [countUnansweredToday, setCountUnansweredToday] = useState(0);
-    const [countQuestionUnanswered, setCountQuestionUnanswered] = useState(0);
-    const [countQuestionUnansweredToday, setCountQuestionUnansweredToday] = useState(0);
-    const [questions, setquestions] = useState<any>([]);
 
     useEffect(() => {
         fetchCountUnanswered();
-        fetchCountQuestionUnanswered();
     }, [shop.id]);
 
     const fetchCountUnanswered = async () => {
@@ -33,44 +27,10 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
         setCountUnansweredToday(response.countUnansweredToday);
     }
 
-    const fetchCountQuestionUnanswered = async () => {
-        const response = await questionService.getCountUnanswered(shop.apiKey);
-        setCountQuestionUnanswered(response.countUnanswered);
-        setCountQuestionUnansweredToday(response.countUnansweredToday);
-        const take = response.countUnanswered;
-        if (take > 0) {
-            await fetchQuestions(take);
-        } else {
-            setquestions([]);
-        }
-    }
-
-    const fetchQuestions = async (take: number) => {
-        const response = await questionService.getQuestions(shop.apiKey, false, take, 0, "dateDesc");
-        setquestions(response);
-    }
-
     const process = async () => {
         const response = await feedbackService.process(shop.id);
         if (response.status === 200) {
             await fetchCountUnanswered();
-        }
-    }
-
-    const processQuestion = async () => {
-        const response = await questionService.process(shop.id);
-        if (response.status === 200) {
-            await fetchCountQuestionUnanswered();
-        }
-    }
-
-    const reply = async (id: string, answer: string) => {
-        const response = await questionService.reply(shop.apiKey, id, answer);
-        if (response.status === 200) {
-            setquestions((prev: any) => prev.filter((q: any) => q.id != id));
-            const responseCount = await questionService.getCountUnanswered(shop.apiKey);
-            setCountQuestionUnanswered(responseCount.countUnanswered);
-            setCountQuestionUnansweredToday(responseCount.countUnansweredToday);
         }
     }
 
@@ -115,22 +75,6 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                             </div>
                             {countUnanswered > 0 ? (
                                 <ButtonItem title="Reply All" onClick={process} />
-                            ) : (
-                                <div></div>
-                            )}
-                        </div>
-                        <div className="bg-white rounded-md p-3">
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="md:text-xl font-bold text-blue-800">Questions count unanswered</div>
-                            </div>
-                            <div>
-                                Count Unanswered: {countQuestionUnanswered}
-                            </div>
-                            <div className="mb-2">
-                                Count Unanswered today: {countQuestionUnansweredToday}
-                            </div>
-                            {countQuestionUnanswered > 0 ? (
-                                <ButtonItem title="Reply All" onClick={processQuestion} />
                             ) : (
                                 <div></div>
                             )}
