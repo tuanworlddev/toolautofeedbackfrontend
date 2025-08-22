@@ -4,6 +4,7 @@ import feedbackService from "../services/feedbackService";
 import ReportComponent from "./ReportComponent";
 import ButtonItem from "./ButtonItem";
 import Campaign from "./Campaign";
+import OrdersReport from "./OrdersReport";
 
 type ShopDetailsProps = {
     shop: Shop;
@@ -19,7 +20,7 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
 
     useEffect(() => {
         fetchCountUnanswered();
-    }, [shop.id]);
+    }, [shop]);
 
     const fetchCountUnanswered = async () => {
         const response = await feedbackService.getCountUnanswered(shop.apiKey);
@@ -56,32 +57,35 @@ function ShopDetails({ shop, onToggleActivate, onToggleIsAuto, onupdateClick, on
                 </div>
             </div>
             {shop.activate ? (
-                <div className="flex flex-col md:flex-row items-start justify-between gap-3 mb-3">
-                    <div className="w-full md:w-1/2 flex flex-col gap-3">
-                        <div className="bg-white rounded-md p-3">
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="md:text-xl font-bold text-blue-800">Feedbacks count unanswered</div>
-                                <label className="inline-flex items-center cursor-pointer">
-                                    <span className="mr-1 text-sm font-medium text-blue-500">Auto reply feedback</span>
-                                    <input type="checkbox" value="" className="sr-only peer" checked={shop.isAuto} onChange={() => onToggleIsAuto(shop.id)} />
-                                    <div className="relative w-9 h-4 bg-blue-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                <div>
+                    <div className="flex flex-col md:flex-row items-start justify-between gap-3 mb-3">
+                        <div className="w-full md:w-1/2 flex flex-col gap-3">
+                            <div className="bg-white rounded-md p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="md:text-xl font-bold text-blue-800">Feedbacks count unanswered</div>
+                                    <label className="inline-flex items-center cursor-pointer">
+                                        <span className="mr-1 text-sm font-medium text-blue-500">Auto reply feedback</span>
+                                        <input type="checkbox" value="" className="sr-only peer" checked={shop.isAuto} onChange={() => onToggleIsAuto(shop.id)} />
+                                        <div className="relative w-9 h-4 bg-blue-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    Count Unanswered: {countUnanswered}
+                                </div>
+                                <div className="mb-2">
+                                    Count Unanswered today: {countUnansweredToday}
+                                </div>
+                                {countUnanswered > 0 ? (
+                                    <ButtonItem title="Reply All" onClick={process} />
+                                ) : (
+                                    <div></div>
+                                )}
                             </div>
-                            <div>
-                                Count Unanswered: {countUnanswered}
-                            </div>
-                            <div className="mb-2">
-                                Count Unanswered today: {countUnansweredToday}
-                            </div>
-                            {countUnanswered > 0 ? (
-                                <ButtonItem title="Reply All" onClick={process} />
-                            ) : (
-                                <div></div>
-                            )}
+                            <ReportComponent shop={shop} />
                         </div>
-                        <ReportComponent shop={shop} />
+                        <Campaign />
                     </div>
-                    <Campaign />
+                    <OrdersReport shop={shop}/>
                 </div>
             ) : (
                 <div>
